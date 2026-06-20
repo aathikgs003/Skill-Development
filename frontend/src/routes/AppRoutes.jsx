@@ -9,33 +9,16 @@ import Register from '../pages/auth/Register';
 import StudentDashboard from '../pages/dashboard/StudentDashboard';
 import SuperAdminDashboard from '../pages/dashboard/SuperAdminDashboard';
 
+// Dynamic Pages
+import Courses from '../pages/courses/Courses';
+import Students from '../pages/students/Students';
+import Settings from '../pages/settings/Settings';
+
 // Layouts & Guard Components
 import PrivateRoute from './PrivateRoute';
 import PublicRoute from './PublicRoute';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import NotFound from '../pages/NotFound';
-
-// Simple placeholders for missing pages to avoid routing crashes
-const CoursesPlaceholder = () => (
-  <div className="p-6 glass-panel rounded-2xl border border-dark-border text-center space-y-3">
-    <h3 className="text-lg font-bold text-white">Ecosystem Courses Catalog</h3>
-    <p className="text-xs text-gray-400 font-light">Browse training programs, syllabus, and module descriptions.</p>
-  </div>
-);
-
-const StudentsPlaceholder = () => (
-  <div className="p-6 glass-panel rounded-2xl border border-dark-border text-center space-y-3">
-    <h3 className="text-lg font-bold text-white">Learners Management Panel</h3>
-    <p className="text-xs text-gray-400 font-light">Monitor student attendance, assessment submissions, and course completions.</p>
-  </div>
-);
-
-const SettingsPlaceholder = () => (
-  <div className="p-6 glass-panel rounded-2xl border border-dark-border text-center space-y-3">
-    <h3 className="text-lg font-bold text-white">Account Settings</h3>
-    <p className="text-xs text-gray-400 font-light">Manage your email preferences, security configurations, and profile fields.</p>
-  </div>
-);
 
 // Dynamic router that renders the correct dashboard based on user role
 const DynamicDashboard = () => {
@@ -63,9 +46,9 @@ const AppRoutes = () => {
       <Route element={<PrivateRoute />}>
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<DynamicDashboard />} />
-          <Route path="/courses" element={<CoursesPlaceholder />} />
-          <Route path="/students" element={<StudentsPlaceholder />} />
-          <Route path="/settings" element={<SettingsPlaceholder />} />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/students" element={<Students />} />
+          <Route path="/settings" element={<Settings />} />
         </Route>
       </Route>
 

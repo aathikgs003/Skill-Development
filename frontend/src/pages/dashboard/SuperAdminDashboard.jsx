@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { 
   Users, 
@@ -5,7 +6,8 @@ import {
   Layers, 
   Briefcase, 
   ArrowUpRight, 
-  TrendingUp 
+  TrendingUp,
+  Info
 } from 'lucide-react';
 import { 
   AreaChart, 
@@ -16,25 +18,51 @@ import {
   Tooltip, 
   ResponsiveContainer 
 } from 'recharts';
-
-const data = [
-  { name: 'Jan', enrollments: 40 },
-  { name: 'Feb', enrollments: 65 },
-  { name: 'Mar', enrollments: 120 },
-  { name: 'Apr', enrollments: 85 },
-  { name: 'May', enrollments: 170 },
-  { name: 'Jun', enrollments: 220 },
-];
+import { dashboardService } from '../../services/dashboard.service';
 
 const SuperAdminDashboard = () => {
   const { user } = useSelector((state) => state.auth);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalStudents: 0,
+    activeTrainers: 0,
+    activeBatches: 0,
+    totalBatches: 0,
+    partnerAgencies: 0,
+    latestBatches: [],
+    trends: []
+  });
 
-  const stats = [
-    { name: 'Total Students', value: '1,280', change: '+12%', icon: GraduationCap, color: 'text-indigo-400 bg-indigo-500/10' },
-    { name: 'Active Trainers', value: '48', change: '+4%', icon: Users, color: 'text-pink-400 bg-pink-500/10' },
-    { name: 'Active Batches', value: '32', change: '+8%', icon: Layers, color: 'text-blue-400 bg-blue-500/10' },
-    { name: 'Partner Agencies', value: '14', change: '0%', icon: Briefcase, color: 'text-emerald-400 bg-emerald-500/10' },
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await dashboardService.getStats();
+        if (response?.data) {
+          setStats(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to load admin stats', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  const statsConfig = [
+    { name: 'Total Students', value: stats.totalStudents, change: '+12%', icon: GraduationCap, color: 'text-indigo-400 bg-indigo-500/10' },
+    { name: 'Active Trainers', value: stats.activeTrainers, change: '+4%', icon: Users, color: 'text-pink-400 bg-pink-500/10' },
+    { name: 'Active Batches', value: stats.activeBatches, change: '+8%', icon: Layers, color: 'text-blue-400 bg-blue-500/10' },
+    { name: 'Partner Agencies', value: stats.partnerAgencies, change: '0%', icon: Briefcase, color: 'text-emerald-400 bg-emerald-500/10' },
   ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 animate-fadeIn">
@@ -52,7 +80,7 @@ const SuperAdminDashboard = () => {
 
       {/* Grid Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        {stats.map((stat) => {
+        {statsConfig.map((stat) => {
           const Icon = stat.icon;
           return (
             <div key={stat.name} className="p-6 rounded-2xl glass-panel glass-panel-hover border border-dark-border flex flex-col justify-between h-36">
@@ -81,12 +109,12 @@ const SuperAdminDashboard = () => {
         <div className="lg:col-span-2 rounded-2xl glass-panel p-6 border border-dark-border space-y-4">
           <div className="flex justify-between items-center pb-4 border-b border-dark-border">
             <h3 className="text-sm font-semibold text-gray-300">Enrollments Analytics (Yearly)</h3>
-            <span className="text-xs text-gray-400">Total: 650 Learners</span>
+            <span className="text-xs text-gray-400">Total: {stats.totalStudents} Registered Learners</span>
           </div>
           
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart data={stats.trends} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorEnrollments" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2}/>
@@ -107,37 +135,34 @@ const SuperAdminDashboard = () => {
         <div className="rounded-2xl glass-panel p-6 border border-dark-border space-y-4">
           <h3 className="text-sm font-semibold text-gray-300 pb-2 border-b border-dark-border">Latest Batches</h3>
           <div className="space-y-4">
-            
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-xs font-semibold text-gray-200">MERN Stack Web Dev</p>
-                <p className="text-[10px] text-gray-400">Trainer: Alex Mercer • 24 Students</p>
+            {stats.latestBatches && stats.latestBatches.length > 0 ? (
+              stats.latestBatches.map((batch, index) => (
+                <div key={batch._id || index} className="flex justify-between items-center pb-2 border-b border-dark-border/50 last:border-0 last:pb-0">
+                  <div>
+                    <p className="text-xs font-semibold text-gray-200">
+                      {batch.course?.title || batch.name}
+                    </p>
+                    <p className="text-[10px] text-gray-400">
+                      Trainer: {batch.trainer ? `${batch.trainer.firstName} ${batch.trainer.lastName}` : 'Unassigned'} • {batch.students?.length || 0} Students
+                    </p>
+                  </div>
+                  <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                    batch.status === 'Ongoing' 
+                      ? 'bg-emerald-500/10 text-emerald-400' 
+                      : batch.status === 'Upcoming' 
+                      ? 'bg-blue-500/10 text-blue-400' 
+                      : 'bg-white/10 text-gray-400'
+                  }`}>
+                    {batch.status}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-10 flex flex-col items-center justify-center space-y-2">
+                <Info size={20} className="text-gray-500" />
+                <p className="text-xs text-gray-500 font-light">No batches registered in the system.</p>
               </div>
-              <span className="text-[9px] font-semibold bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                Ongoing
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-xs font-semibold text-gray-200">Cybersecurity Essentials</p>
-                <p className="text-[10px] text-gray-400">Trainer: Sarah Conner • 18 Students</p>
-              </div>
-              <span className="text-[9px] font-semibold bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                Ongoing
-              </span>
-            </div>
-
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-xs font-semibold text-gray-200">Data Science Fundamentals</p>
-                <p className="text-[10px] text-gray-400">Trainer: James Cole • 30 Students</p>
-              </div>
-              <span className="text-[9px] font-semibold bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full uppercase tracking-wider">
-                Upcoming
-              </span>
-            </div>
-
+            )}
           </div>
         </div>
 
