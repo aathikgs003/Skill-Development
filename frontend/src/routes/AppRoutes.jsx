@@ -13,6 +13,7 @@ import SuperAdminDashboard from '../pages/dashboard/SuperAdminDashboard';
 import Courses from '../pages/courses/Courses';
 import Students from '../pages/students/Students';
 import Settings from '../pages/settings/Settings';
+import SchedulingDashboard from '../pages/scheduling/SchedulingDashboard';
 
 // Layouts & Guard Components
 import PrivateRoute from './PrivateRoute';
@@ -48,6 +49,7 @@ const AppRoutes = () => {
           <Route path="/dashboard" element={<DynamicDashboard />} />
           <Route path="/courses" element={<Courses />} />
           <Route path="/students" element={<Students />} />
+          <Route path="/scheduling" element={<SchedulingDashboard />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
       </Route>

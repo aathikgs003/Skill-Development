@@ -4,19 +4,22 @@ import {
   getAllAllocationRules,
   getAllocationRuleById,
   updateAllocationRule,
-  deleteAllocationRule
+  deleteAllocationRule,
 } from '../../controllers/scheduling/allocationRule.controller.js';
-import protect from '../../middlewares/auth.middleware.js';
+import authMiddleware from '../../middlewares/auth.middleware.js';
+import { authorizeRoles } from '../../middlewares/rbac.middleware.js';
 
 const router = express.Router();
 
+router.use(authMiddleware);
+
 router.route('/')
-  .post(protect, createAllocationRule)
-  .get(protect, getAllAllocationRules);
+  .post(authorizeRoles('SuperAdmin', 'Admin', 'Partner', 'Organization'), createAllocationRule)
+  .get(authorizeRoles('SuperAdmin', 'Admin', 'Partner', 'Organization', 'Coordinator'), getAllAllocationRules);
 
 router.route('/:id')
-  .get(protect, getAllocationRuleById)
-  .put(protect, updateAllocationRule)
-  .delete(protect, deleteAllocationRule);
+  .get(authorizeRoles('SuperAdmin', 'Admin', 'Partner', 'Organization', 'Coordinator'), getAllocationRuleById)
+  .put(authorizeRoles('SuperAdmin', 'Admin', 'Partner', 'Organization'), updateAllocationRule)
+  .delete(authorizeRoles('SuperAdmin', 'Admin', 'Partner', 'Organization'), deleteAllocationRule);
 
 export default router;

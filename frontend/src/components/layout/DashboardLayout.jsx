@@ -11,7 +11,8 @@ import {
   Menu, 
   X, 
   User as UserIcon,
-  Bell
+  Bell,
+  Calendar
 } from 'lucide-react';
 
 const DashboardLayout = () => {
@@ -30,6 +31,7 @@ const DashboardLayout = () => {
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['SuperAdmin', 'Admin', 'Student', 'Trainer', 'Coordinator'] },
     { name: 'Courses', path: '/courses', icon: BookOpen, roles: ['SuperAdmin', 'Admin', 'Student', 'Trainer', 'Coordinator'] },
     { name: 'Students', path: '/students', icon: Users, roles: ['SuperAdmin', 'Admin', 'Trainer', 'Coordinator'] },
+    { name: 'Scheduling', path: '/scheduling', icon: Calendar, roles: ['SuperAdmin', 'Admin', 'Student', 'Trainer', 'Coordinator', 'Organization', 'Partner'] },
     { name: 'Settings', path: '/settings', icon: Settings, roles: ['SuperAdmin', 'Admin', 'Student', 'Trainer', 'Coordinator', 'Organization', 'Partner', 'FundingAgency'] },
   ];
 

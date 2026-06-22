@@ -4,6 +4,7 @@ dotenv.config();
 import app from './app.js';
 import connectDB from './config/db.js';
 import logger from './config/logger.js';
+import { initScheduler } from './jobs/scheduler.js';
 
 const PORT = process.env.PORT || 5000;
 
@@ -14,6 +15,7 @@ connectDB();
 const server = app.listen(PORT, () => {
   logger.info(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
   logger.info(`📚 API Endpoint: http://localhost:${PORT}/api/${process.env.API_VERSION || 'v1'}`);
+  initScheduler();
 });
 
 // Handle unhandled promise rejections

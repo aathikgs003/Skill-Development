@@ -4,19 +4,40 @@ import {
   getAllModuleSchedules,
   getModuleScheduleById,
   updateModuleSchedule,
-  deleteModuleSchedule
+  deleteModuleSchedule,
 } from '../../controllers/scheduling/moduleSchedule.controller.js';
-import protect from '../../middlewares/auth.middleware.js';
+import {
+  autoAllocateTrainer,
+  getTrainerRecommendations,
+} from '../../controllers/scheduling/autoAllocation.controller.js';
+import authMiddleware from '../../middlewares/auth.middleware.js';
+import { authorizeRoles } from '../../middlewares/rbac.middleware.js';
 
 const router = express.Router();
 
+router.use(authMiddleware);
+
+// Auto-allocation endpoints
+router.post(
+  '/allocate/trainer/:moduleScheduleId',
+  authorizeRoles('SuperAdmin', 'Admin', 'Partner', 'Organization', 'Coordinator'),
+  autoAllocateTrainer
+);
+
+router.get(
+  '/recommend/trainer/:moduleScheduleId',
+  authorizeRoles('SuperAdmin', 'Admin', 'Partner', 'Organization', 'Coordinator'),
+  getTrainerRecommendations
+);
+
+// Standard CRUD endpoints
 router.route('/')
-  .post(protect, createModuleSchedule)
-  .get(protect, getAllModuleSchedules);
+  .post(authorizeRoles('SuperAdmin', 'Admin', 'Partner', 'Organization'), createModuleSchedule)
+  .get(getAllModuleSchedules);
 
 router.route('/:id')
-  .get(protect, getModuleScheduleById)
-  .put(protect, updateModuleSchedule)
-  .delete(protect, deleteModuleSchedule);
+  .get(getModuleScheduleById)
+  .put(authorizeRoles('SuperAdmin', 'Admin', 'Partner', 'Organization', 'Coordinator'), updateModuleSchedule)
+  .delete(authorizeRoles('SuperAdmin', 'Admin', 'Partner', 'Organization'), deleteModuleSchedule);
 
 export default router;

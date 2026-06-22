@@ -4,6 +4,7 @@
 # Environment files
 **/.env
 **/.env.*
+!**/.env.example
 
 # Build output
 frontend/dist/
@@ -20,6 +21,7 @@ Thumbs.db
 # Editor directories and files
 .vscode/
 .idea/
+.qodo/
 *.suo
 *.ntvs* 
 *.njsproj
